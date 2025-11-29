@@ -1,20 +1,18 @@
-from serpapi_sercher import SerpApiSearch
 from head_line_extractor import HeadlineExtractor
 from openai_adapter import OpenAIAdapter
+from google_searcher import GoogleSearcher
 
 class HeadlineAnalyzer:
 
     def __init__(self, query):
         self.query = query
-        self.serp_api_search = SerpApiSearch()
+        self.google_searcher = GoogleSearcher()
         self.elements_texts_combined = ""
 
     def analyze(self, use_ai_analysis=False):
-        self.serp_api_search.search(self.query)
-        self.urls = self.serp_api_search.get_urls()
-        self.related_keywords = self.serp_api_search.get_related_keywords()
+        urls, related_keywords = self.google_searcher.get_search_result(self.query)
 
-        extractor = HeadlineExtractor(self.urls)
+        extractor = HeadlineExtractor(urls)
         self.elements_texts = extractor.extract_elements_text()
 
         # URLテキストを変数にまとめる
@@ -25,7 +23,7 @@ class HeadlineAnalyzer:
             ai_analysis = self._ai_analysis()
             self.elements_texts_combined += f"\n--- AI Analysis ---\n{ai_analysis}\n"
 
-        self.elements_texts_combined += "\n--- 関連キーワード ---\n" + "\n".join(self.related_keywords)    
+        self.elements_texts_combined += "\n--- 関連キーワード ---\n" + "\n".join(related_keywords)    
         
         return self.elements_texts_combined
 
